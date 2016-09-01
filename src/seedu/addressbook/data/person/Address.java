@@ -12,8 +12,18 @@ public class Address {
     public static final String MESSAGE_ADDRESS_CONSTRAINTS = "Person addresses can be in any format";
     public static final String ADDRESS_VALIDATION_REGEX = ".+";
 
-    public final String value;
+    private static final int BLOCK_INDEX = 0;
+    private static final int STREET_INDEX = 1;
+    private static final int UNIT_INDEX = 2;
+    private static final int POSTALCODE_INDEX = 3;
+    
+    private Block block;
+    private Street street;
+    private Unit unit;
+    private PostalCode postalCode;
+
     private boolean isPrivate;
+    
 
     /**
      * Validates given address.
@@ -25,7 +35,20 @@ public class Address {
         if (!isValidAddress(address)) {
             throw new IllegalValueException(MESSAGE_ADDRESS_CONSTRAINTS);
         }
-        this.value = address;
+
+        
+        String[] splitAddress = address.split("\\, ");
+        String[] input = new String[4];
+        
+        for (int i = 0; i < splitAddress.length; i++){
+        	input[i] = splitAddress[i];
+        }
+        
+        
+        block = new Block(input[BLOCK_INDEX]);
+        street = new Street(input[STREET_INDEX]);
+        unit = new Unit(input[UNIT_INDEX]);
+        postalCode = new PostalCode(input[POSTALCODE_INDEX]);
     }
 
     /**
@@ -37,19 +60,43 @@ public class Address {
 
     @Override
     public String toString() {
-        return value;
+        String printingAddress = "";
+        
+        if (block.getBlock() != null){
+        	printingAddress += block.getBlock();
+        }
+        if (street.getStreet() != null){
+        	if (!printingAddress.equals("")){
+        		printingAddress += ", ";
+        	}
+        	printingAddress += street.getStreet();
+        }
+        if (unit.getUnit() != null){
+        	if (!printingAddress.equals("")){
+        		printingAddress += ", ";
+        	}
+        	printingAddress += unit.getUnit();
+        }
+        if (postalCode.getPostalCode() != null){
+        	if (!printingAddress.equals("")){
+        		printingAddress += ", ";
+        	}
+        	printingAddress += postalCode.getPostalCode();
+        }
+        
+        return printingAddress;
     }
 
     @Override
     public boolean equals(Object other) {
         return other == this // short circuit if same object
                 || (other instanceof Address // instanceof handles nulls
-                && this.value.equals(((Address) other).value)); // state check
+                && this.toString().equals(((Address) other).toString())); // state check
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.toString().hashCode();
     }
 
     public boolean isPrivate() {
